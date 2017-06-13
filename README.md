@@ -35,7 +35,7 @@ for (int i = 0; i< ptsx.size(); i++)
 
 # Model Predictive Control with Latency
 
-To handle latency the actuators were constrained to the previous actautions for one time step.
+To handle latency the actuators were constrained to the previous actuations for one time step.
 ```
   for (int i = delta_start; i < delta_start + latency_steps; i++)
   {
