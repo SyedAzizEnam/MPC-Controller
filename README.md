@@ -1,6 +1,56 @@
 # CarND-Controls-MPC
 Self-Driving Car Engineer Nanodegree Program
 
+# The Model
+The model of the predictive controller is a basic kinematic model that assumes constant velocity and yaw except when changed by the actuators. The model is describe in the following constraints in MPC.cpp
+
+```
+      fg[2 + x_start + i] = x1 - (x0 + v0 * CppAD::cos(psi0) * dt);
+      fg[2 + y_start + i] = y1 - (y0 + v0 * CppAD::sin(psi0) * dt);
+      fg[2 + psi_start + i] = psi1 - (psi0 - v0 * delta0 / Lf * dt);
+      fg[2 + v_start + i] = v1 - (v0 + a0 * dt);
+      fg[2 + cte_start + i] =
+              cte1 - ((f0 - y0) + (v0 * CppAD::sin(epsi0) * dt));
+      fg[2 + epsi_start + i] =
+              epsi1 - ((psi0 - psides0) - v0 * delta0 / Lf * dt);
+```
+
+# Timestep Length and Elapsed Duration (N & dt)
+I chose to use N = 9 and dt= 0.1. Other values for N where tried but higher values of N led to oscillations and lower values fo N led to leaning towards one side. 
+
+# Polynomial Fitting and MPC Preprocessing
+The points given by the simulator are shifted and rotated to the cars reference coordinates
+```
+for (int i = 0; i< ptsx.size(); i++)
+{
+  //translate
+  double t_x = ptsx[i] - px;
+  double t_y = ptsy[i] - py;
+
+  //rotate
+  ptsx[i] = t_x * cos(-psi) - t_y * sin(-psi);
+  ptsy[i] = t_x * sin(-psi) + t_y * cos(-psi);
+}
+```
+
+# Model Predictive Control with Latency
+
+To handle latency the actuators were constrained to the previous actautions for one time step.
+```
+  for (int i = delta_start; i < delta_start + latency_steps; i++)
+  {
+    vars_lowerbound[i] = previous_delta;
+    vars_upperbound[i] = previous_delta;
+  }
+  
+  ...
+  
+  for (int i = a_start; i < a_start + latency_steps; i++)
+  {
+    vars_lowerbound[i] = previous_a;
+    vars_upperbound[i] = previous_a;
+  }
+```
 ---
 
 ## Dependencies
