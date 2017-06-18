@@ -1,9 +1,26 @@
 # CarND-Controls-MPC
 Self-Driving Car Engineer Nanodegree Program
 
-# The Model
-The model of the predictive controller is a basic kinematic model that assumes constant velocity and yaw except when changed by the actuators. The model is describe in the following constraints in MPC.cpp
+![alt text](http://url/to/img.png)
 
+# MPC
+The model predictive controller (MPC) is a common controller that tends to perform better than other controllers such as PID controllers. This is because MPC takes into account how the vehicles trajectory will change based on certain actuations. MPC optimizes a cost over a trajectory rather than a simple state like traditional PID controllers. 
+
+# The Model
+The model of the predictive controller is a basic kinematic model that assumes constant velocity and yaw except when changed by the actuators. 
+
+The simulator provides us the state of the vehicle long with a some points along the middle fo the lane. We can fit a polynomial to these opints to genereate an optimal trajectory which we can use to calcualte cte(cross track error) and espi (error psi). Given a state < x, y, psi, cte, epsi> at time t, we can predict what the state will be at t+1 with the following equations:
+
+$$
+x_(t+1) = x_t + v_t*cos(\psi_t)*dt
+y_(t+1) = y_t + v_t*sin(\psi_t)*dt
+\psi_(t+1) = \psi_t + \frac{v_t}{L_f}*\delta_t)*dt
+v_(t+1) = v_t + a_t*dt
+cte_(t+1) = f(x_t) - y_t + (v_t*sin(e\psi_t)*dt
+e\psi_t+1 = \psi_t - \psi_dest + (\frac{v_t}{L_f}*\delta_t)*dt)
+$$
+
+The model is describe in the following constraints in MPC.cpp
 ```
       fg[2 + x_start + i] = x1 - (x0 + v0 * CppAD::cos(psi0) * dt);
       fg[2 + y_start + i] = y1 - (y0 + v0 * CppAD::sin(psi0) * dt);
@@ -14,12 +31,10 @@ The model of the predictive controller is a basic kinematic model that assumes c
       fg[2 + epsi_start + i] =
               epsi1 - ((psi0 - psides0) - v0 * delta0 / Lf * dt);
 ```
+# Polynomial Fitting and Preprocessing
 
-# Timestep Length and Elapsed Duration (N & dt)
-I chose to use N = 9 and dt= 0.1. Other values for N where tried but higher values of N led to oscillations and lower values fo N led to leaning towards one side. 
+In order to simplfy some calculations we shift and rotate the points given to us by the simulator to the cars reference coordinates.
 
-# Polynomial Fitting and MPC Preprocessing
-The points given by the simulator are shifted and rotated to the cars reference coordinates
 ```
 for (int i = 0; i< ptsx.size(); i++)
 {
@@ -33,9 +48,39 @@ for (int i = 0; i< ptsx.size(); i++)
 }
 ```
 
+# The Cost Optimization
+Once we have trajectories we can associate costs with them. We obviously want to minimize the cte and epsi but we also can incorporate other costs for some desired behavior. For example we can include the difference in speed from a desired speed, prefer trajectories with less actuations, and prefer smooth transistions between actuations. 
+
+The cost is describe in the following equations in MPC.cpp
+```
+    fg[0] = 0;
+    for (int t = 0; t < N; t++) {
+      fg[0] += CppAD::pow(vars[cte_start + t], 2);
+      fg[0] += CppAD::pow(vars[epsi_start + t], 2);
+      fg[0] += CppAD::pow(vars[v_start + t] - ref_v, 2);
+    }
+
+    // Minimize the use of actuators.
+    for (int t = 0; t < N - 1; t++) {
+      fg[0] += CppAD::pow(vars[delta_start + t], 2);
+      fg[0] += CppAD::pow(vars[a_start + t], 2);
+    }
+
+    // Minimize the value gap between sequential actuations.
+    for (int t = 0; t < N - 2; t++) {
+      fg[0] += CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
+      fg[0] += 100*CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
+    }
+```
+
+# Timestep Length and Elapsed Duration (N & dt)
+When we generate trajectories we do so by calulating the predicted state of the vehicle at certain time steps. We have two parametets we can tune here the number of steps N and the tiem gaps between the steps dt. I chose to use N = 9 and dt= 0.1. Other values for N where tried but higher values of N led to oscillations and lower values fo N led to leaning towards one side.  
+
 # Model Predictive Control with Latency
 
-To handle latency the actuators were constrained to the previous actuations for one time step.
+The simulator also provides us a way to simluate time latency experienced in real world systems. The latency is set to about 100ms. To handle latency the actuators were constrained to the previous actuations for one time step for the trajectory simulations. 
+
+We do this by setting the upper and lower bounds of the actuators to the previous actuations in the following lines of code: 
 ```
   for (int i = delta_start; i < delta_start + latency_steps; i++)
   {
@@ -99,67 +144,3 @@ To handle latency the actuators were constrained to the previous actuations for 
 2. Make a build directory: `mkdir build && cd build`
 3. Compile: `cmake .. && make`
 4. Run it: `./mpc`.
-
-## Tips
-
-1. It's recommended to test the MPC on basic examples to see if your implementation behaves as desired. One possible example
-is the vehicle starting offset of a straight line (reference). If the MPC implementation is correct, after some number of timesteps
-(not too many) it should find and track the reference line.
-2. The `lake_track_waypoints.csv` file has the waypoints of the lake track. You could use this to fit polynomials and points and see of how well your model tracks curve. NOTE: This file might be not completely in sync with the simulator so your solution should NOT depend on it.
-3. For visualization this C++ [matplotlib wrapper](https://github.com/lava/matplotlib-cpp) could be helpful.
-
-## Editor Settings
-
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
-
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
-
-## Code Style
-
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
-
-## Project Instructions and Rubric
-
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
-
-More information is only accessible by people who are already enrolled in Term 2
-of CarND. If you are enrolled, see [the project page](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/f1820894-8322-4bb3-81aa-b26b3c6dcbaf/lessons/b1ff3be0-c904-438e-aad3-2b5379f0e0c3/concepts/1a2255a0-e23c-44cf-8d41-39b8a3c8264a)
-for instructions and the project rubric.
-
-## Hints!
-
-* You don't have to follow this directory structure, but if you do, your work
-  will span all of the .cpp files here. Keep an eye out for TODOs.
-
-## Call for IDE Profiles Pull Requests
-
-Help your fellow students!
-
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to we ensure
-that students don't feel pressured to use one IDE or another.
-
-However! I'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
-
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
-
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
-
-Frankly, I've never been involved in a project with multiple IDE profiles
-before. I believe the best way to handle this would be to keep them out of the
-repo root to avoid clutter. My expectation is that most profiles will include
-instructions to copy files to a new location to get picked up by the IDE, but
-that's just a guess.
-
-One last note here: regardless of the IDE used, every submitted project must
-still be compilable with cmake and make./
