@@ -1,7 +1,7 @@
 # CarND-Controls-MPC
 Self-Driving Car Engineer Nanodegree Program
 
-![alt text](http://url/to/img.png)
+![alt text](https://github.com/SyedAzizEnam/MPC-Controller/blob/master/mpc-image.png)
 
 # MPC
 The model predictive controller (MPC) is a common controller that tends to perform better than other controllers such as PID controllers. This is because MPC takes into account how the vehicles trajectory will change based on certain actuations. MPC optimizes a cost over a trajectory rather than a simple state like traditional PID controllers. 
