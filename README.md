@@ -49,7 +49,7 @@ for (int i = 0; i< ptsx.size(); i++)
 ```
 
 # The Cost Optimization
-Once we have trajectories we can associate costs with them. We obviously want to minimize the cte and epsi but we also can incorporate other costs for some desired behavior. For example we can include the difference in speed from a desired speed, prefer trajectories with less actuations, and prefer smooth transistions between actuations. 
+Once we have trajectories we can associate costs with them. We obviously want to minimize the cte and epsi but we can also incorporate other costs for some desired behavior. For example we can include the difference in speed from a desired speed, prefer trajectories with less actuations, or prefer smooth transistions between actuations. 
 
 The cost is describe in the following equations in MPC.cpp
 ```
