@@ -11,14 +11,14 @@ The model of the predictive controller is a basic kinematic model that assumes c
 
 The simulator provides us the state of the vehicle long with a some points along the middle fo the lane. We can fit a polynomial to these opints to genereate an optimal trajectory which we can use to calcualte cte(cross track error) and espi (error psi). Given a state < x, y, psi, cte, epsi> at time t, we can predict what the state will be at t+1 with the following equations:
 
-$$
-x_(t+1) = x_t + v_t*cos(\psi_t)*dt
-y_(t+1) = y_t + v_t*sin(\psi_t)*dt
-\psi_(t+1) = \psi_t + \frac{v_t}{L_f}*\delta_t)*dt
+```
+x_(t+1) = x_t + v_t*cos(psi_t)*dt
+y_(t+1) = y_t + v_t*sin(psi_t)*dt
+psi_(t+1) = psi_t + (v_t/L_f) *delta_t)*dt
 v_(t+1) = v_t + a_t*dt
-cte_(t+1) = f(x_t) - y_t + (v_t*sin(e\psi_t)*dt
-e\psi_t+1 = \psi_t - \psi_dest + (\frac{v_t}{L_f}*\delta_t)*dt)
-$$
+cte_(t+1) = f(x_t) - y_t + (v_t*sin(epsi_t)*dt
+epsi_t+1 = psi_t - psi_dest + (v_t/L_f) *delta_t)*dt)
+```
 
 The model is describe in the following constraints in MPC.cpp
 ```
