@@ -96,7 +96,10 @@ We do this by setting the upper and lower bounds of the actuators to the previou
     vars_upperbound[i] = previous_a;
   }
 ```
----
+
+# Video
+[![IMAGE ALT TEXT
+HERE](https://img.youtube.com/vi/ua0dXa26SQc/0.jpg)](https://www.youtube.com/watch?v=ua0dXa26SQc)
 
 ## Dependencies
 
