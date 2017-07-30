@@ -9,7 +9,7 @@ The model predictive controller (MPC) is a common controller that tends to perfo
 # The Model
 The model of the predictive controller is a basic kinematic model that assumes constant velocity and yaw except when changed by the actuators. 
 
-The simulator provides us the state of the vehicle long with a some points along the middle fo the lane. We can fit a polynomial to these points to genereate an optimal trajectory which we can use to calcualte cte(cross track error) and espi (error psi). Given a state < x, y, psi, cte, epsi> at time t, we can predict what the state will be at t+1 with the following equations:
+The simulator provides us the state of the vehicle long with a some points along the middle fo the lane. We can fit a polynomial to these points to genereate an optimal trajectory which we can use to calculate cte(cross track error) and espi (error psi). Given a state < x, y, psi, cte, epsi> at time t, we can predict what the state will be at t+1 with the following equations:
 
 ```
 x_(t+1) = x_t + v_t*cos(psi_t)*dt
