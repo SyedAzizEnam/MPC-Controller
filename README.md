@@ -33,7 +33,7 @@ The model is describe in the following constraints in MPC.cpp
 ```
 # Polynomial Fitting and Preprocessing
 
-In order to simplfy some calculations we shift and rotate the points given to us by the simulator to the cars reference coordinates.
+In order to simplify some calculations we shift and rotate the points given to us by the simulator to the cars reference coordinates.
 
 ```
 for (int i = 0; i< ptsx.size(); i++)
@@ -74,7 +74,7 @@ The cost is describe in the following equations in MPC.cpp
 ```
 
 # Timestep Length and Elapsed Duration (N & dt)
-When we generate trajectories we do so by calulating the predicted state of the vehicle at certain time steps. We have two parametets we can tune here the number of steps N and the tiem gaps between the steps dt. I chose to use N = 9 and dt= 0.1. Other values for N where tried but higher values of N led to oscillations and lower values fo N led to leaning towards one side.  
+When we generate trajectories we do so by calulating the predicted state of the vehicle at certain time steps. We have two parametets we can tune here the number of steps N and the time gaps between the steps dt. I chose to use N = 9 and dt= 0.1. Other values for N where tried but higher values of N led to oscillations and lower values fo N led to leaning towards one side.  
 
 # Model Predictive Control with Latency
 
